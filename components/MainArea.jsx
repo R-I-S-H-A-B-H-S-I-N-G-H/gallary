@@ -79,6 +79,7 @@ export default function MainArea() {
 
 	async function dataHandler() {
 		await retrieveData();
+		// await getImgData();
 	}
 	useEffect(() => {
 		dataHandler();
