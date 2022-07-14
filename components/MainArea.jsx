@@ -1,23 +1,17 @@
 import { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
-const testIMGUTL = 'https://live.staticflickr.com/65535/52206112054_6cf2795aa2_m.jpg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useNavigation } from '@react-navigation/native';
+import Header from './Header';
 export default function MainArea() {
 	const navigation = useNavigation();
 
 	const [imageList, setImageList] = useState([]);
-	const [counter, setcountter] = useState(1);
 
-	async function getImgData() {
-		console.log(imageList.length);
-		// return;
-		if (counter > 10) return;
+	async function getImgData(count = 1) {
+		const URL = `https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&per_page=20&page=${count}&api_key=6f102c62f41998d151e5a1b48713cf13&format=json&nojsoncallback=1&extras=url_s`;
 
-		const URL = `https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&per_page=20&page=${counter}&api_key=6f102c62f41998d151e5a1b48713cf13&format=json&nojsoncallback=1&extras=url_s`;
-
-		setcountter(counter + 1);
 		const raw = await fetch(URL);
 		const res = await raw.json();
 		var list = res.photos.photo;
@@ -25,7 +19,6 @@ export default function MainArea() {
 			return { id: item.id, url: item.url_s };
 		});
 
-		list = [...imageList, ...list];
 		const uniqueIds = [];
 		const unique = list.filter((element) => {
 			const isDuplicate = uniqueIds.includes(element.id);
@@ -39,11 +32,12 @@ export default function MainArea() {
 			return false;
 		});
 		// console.log(unique);
-
+		unique.push({});
 		setImageList(unique);
-		await storedata(unique);
+		console.log(unique);
+		// await storedata(unique);
 
-		// console.log(s);
+		console.log(unique.length);
 	}
 	async function storedata(data) {
 		try {
@@ -78,8 +72,8 @@ export default function MainArea() {
 	}
 
 	async function dataHandler() {
-		await retrieveData();
-		// await getImgData();
+		// await retrieveData();
+		await getImgData(1);
 	}
 	useEffect(() => {
 		dataHandler();
@@ -87,41 +81,97 @@ export default function MainArea() {
 	}, []);
 
 	return (
-		<View>
-			<FlatList
-				onEndReached={async () => await getImgData()}
-				onEndReachedThreshold={2}
-				style={{
-					backgroundColor: 'white',
-					// width: '100%',
-					marginTop: 10,
-				}}
-				data={imageList}
-				numColumns={2}
-				renderItem={({ item, index }) => (
-					<View
-						key={item.id}
-						style={{
-							width: '50%',
-						}}
-					>
-						<TouchableOpacity
-							onPress={() => navigation.navigate('Photo', { url: item.url })}
-							style={{ padding: 5 }}
-						>
-							<Image style={styles.image} source={{ uri: item.url }} />
-						</TouchableOpacity>
-					</View>
-				)}
-			/>
-		</View>
+		<>
+			<Header />
+			<View style={styles.container}>
+				<FlatList
+					style={{
+						backgroundColor: 'white',
+						// width: '100%',
+						marginTop: 10,
+					}}
+					data={imageList}
+					numColumns={2}
+					renderItem={({ item, index }) =>
+						index < imageList.length - 1 ? (
+							<View
+								key={item.id}
+								style={{
+									width: '50%',
+								}}
+							>
+								<TouchableOpacity
+									onPress={() => navigation.navigate('Photo', { url: item.url })}
+									style={{ padding: 5 }}
+								>
+									<Image style={styles.image} source={{ uri: item.url }} />
+								</TouchableOpacity>
+							</View>
+						) : (
+							<View
+								style={{
+									padding: 10,
+									display: 'flex',
+									flexDirection: 'row',
+									width: '100%',
+									alignItems: 'center',
+									justifyContent: 'center',
+								}}
+							>
+								<TouchableOpacity
+									onPress={async () => await getImgData(1)}
+									style={{
+										marginHorizontal: 10,
+										padding: 6,
+										borderRadius: 5,
+										backgroundColor: 'orange',
+									}}
+								>
+									<Text>1</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={async () => await getImgData(2)}
+									style={{
+										marginHorizontal: 10,
+										padding: 6,
+										borderRadius: 5,
+										backgroundColor: 'orange',
+									}}
+								>
+									<Text>2</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={async () => await getImgData(3)}
+									style={{
+										marginHorizontal: 10,
+										padding: 6,
+										borderRadius: 5,
+										backgroundColor: 'orange',
+									}}
+								>
+									<Text>3</Text>
+								</TouchableOpacity>
+							</View>
+						)
+					}
+				/>
+			</View>
+		</>
 	);
 }
 const styles = StyleSheet.create({
+	container: {
+		height: '85%',
+		width: '100%',
+		backgroundColor: '#f5f5f5',
+		paddingBottom: 20,
+		borderRadius: 20,
+	},
 	image: {
 		width: '100%',
 		aspectRatio: 2 / 1.7,
 		margin: 2,
 		borderRadius: 10,
+		backgroundColor: '#ADD8E6',
 	},
 });

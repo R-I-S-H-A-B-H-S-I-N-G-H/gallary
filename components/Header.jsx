@@ -1,5 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+
 export default function Header() {
+	const navigation = useNavigation();
+
 	return (
 		<View
 			style={{
@@ -16,6 +20,22 @@ export default function Header() {
 			>
 				Photos
 			</Text>
+
+			<TextInput
+				placeholder={'Search '}
+				style={{
+					marginHorizontal: 10,
+					padding: 8,
+					width: '90%',
+					borderRadius: 10,
+					backgroundColor: 'white',
+					fontWeight: 'bold',
+					// width: '100%',
+				}}
+				onPressIn={() => {
+					navigation.navigate('Search');
+				}}
+			/>
 		</View>
 	);
 }
